@@ -24,7 +24,9 @@ jobs:
       - name: Set timestamp and env name
         run: |
           HHMM=$(date -u +'%H%M')
-          echo "AZURE_ENV_NAME=azd-${{ vars.AZURE_ENV_NAME }}-${HHMM}" >> $GITHUB_ENV
+          BASE_NAME="${{ vars.AZURE_ENV_NAME }}"
+          BASE_NAME="${BASE_NAME:-cwyd}"
+          echo "AZURE_ENV_NAME=azd-${BASE_NAME}-${HHMM}" >> $GITHUB_ENV
 
       - name: Install azd
         uses: Azure/setup-azd@v2
@@ -47,8 +49,7 @@ jobs:
       - name: Provision and Deploy
         shell: bash
         run: |
-          if ! azd env select "$AZURE_ENV_NAME"; then
-            azd env new "$AZURE_ENV_NAME" --subscription "$AZURE_SUBSCRIPTION_ID" --location "$AZURE_LOCATION" --no-prompt
-          fi
+          azd env new "$AZURE_ENV_NAME" --subscription "$AZURE_SUBSCRIPTION_ID" --location "$AZURE_LOCATION" --no-prompt
           azd config set defaults.subscription "$AZURE_SUBSCRIPTION_ID"
+          azd env set AZURE_LOCATION "$AZURE_LOCATION"
           azd up --no-prompt
