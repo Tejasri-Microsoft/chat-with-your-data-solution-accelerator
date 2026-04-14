@@ -34,6 +34,20 @@ jobs:
           HHMM=$(date -u +'%H%M')
           echo "AZURE_ENV_NAME=${AZURE_ENV_NAME}-${HHMM}" >> "$GITHUB_ENV"
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        shell: bash
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          sudo ln -sf $HOME/.local/bin/poetry /usr/local/bin/poetry
+          poetry --version
+          poetry self add poetry-plugin-export
+
       - name: Install azd
         uses: Azure/setup-azd@v2
 
