@@ -46,6 +46,19 @@ jobs:
             --federated-credential-provider "github" \
             --tenant-id "$AZURE_TENANT_ID"
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Provision and Deploy
         shell: bash
         run: |
