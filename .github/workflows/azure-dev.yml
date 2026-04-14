@@ -15,7 +15,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: azd deploy
-  
+    environment: production
     env:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
