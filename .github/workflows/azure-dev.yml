@@ -10,25 +10,23 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: azd deploy
     environment: production
     env:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
       AZURE_DEV_COLLECT_TELEMETRY: ${{ vars.AZURE_DEV_COLLECT_TELEMETRY }}
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set timestamp and env name
-        shell: bash
         run: |
           HHMM=$(date -u +'%H%M')
-          echo "AZURE_ENV_NAME=${AZURE_ENV_NAME}-${HHMM}" >> "$GITHUB_ENV"
+          BASE_NAME="${{ vars.AZURE_ENV_NAME }}"
+          BASE_NAME="${BASE_NAME:-cwyd}"
+          echo "AZURE_ENV_NAME=azd-${BASE_NAME}-${HHMM}" >> $GITHUB_ENV
 
       - name: Install azd
         uses: Azure/setup-azd@v2
@@ -51,10 +49,9 @@ jobs:
       - name: Provision and Deploy
         shell: bash
         run: |
-          # Always create the environment (idempotent — succeeds even if it exists)
-          azd env new "$AZURE_ENV_NAME" --subscription "$AZURE_SUBSCRIPTION_ID" --location "$AZURE_LOCATION" --no-prompt || true
-          azd env select "$AZURE_ENV_NAME"
-
+          azd env new "$AZURE_ENV_NAME" --subscription "$AZURE_SUBSCRIPTION_ID" --location "$AZURE_LOCATION" --no-prompt
           azd config set defaults.subscription "$AZURE_SUBSCRIPTION_ID"
-
+          azd env set AZURE_LOCATION "$AZURE_LOCATION"
+          azd env set AZURE_SUBSCRIPTION_ID "$AZURE_SUBSCRIPTION_ID"
+          azd env config set infra.parameters.location "$AZURE_LOCATION"
           azd up --no-prompt
