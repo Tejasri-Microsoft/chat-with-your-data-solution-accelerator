@@ -67,4 +67,5 @@ jobs:
           azd env set AZURE_LOCATION "$AZURE_LOCATION"
           azd env set AZURE_SUBSCRIPTION_ID "$AZURE_SUBSCRIPTION_ID"
           azd env config set infra.parameters.location "$AZURE_LOCATION"
+          azd env config set infra.parameters.enableMonitoring "false"
           azd up --no-prompt
